@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Facebook Link Prediction - CSE 258 Assignment 2</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f2f5;
+      color: #050505;
+    }
+
+    .friends-page {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /*  sidebar */
+    .sidebar {
+      width: 260px;
+      background: #ffffff;
+      padding: 16px;
+      box-sizing: border-box;
+      border-right: 1px solid #3a3b3c;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      color: #1877f2;
+    }
+
+    .sidebar .project-info {
+      padding: 12px;
+      background: #f0f2f5;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .sidebar .project-info p {
+      margin: 4px 0;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 8px;
+      color: #050505;
+      text-decoration: none;
+      font-size: 15px;
+    }
+
+    .sidebar nav a:hover {
+      background: #3a3b3c;
+    }
+
+    .sidebar nav a.active {
+      background: #2374e1;
+      font-weight: 600;
+    }
+
+    /* main content  */
+    .friends-main {
+      flex: 1;
+      padding: 24px;
+      box-sizing: border-box;
+      max-width: 1200px;
+    }
+
+    .friends-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #3a3b3c;
+    }
+
+    .friends-header h1 {
+      margin: 0;
+      font-size: 28px;
+      color: #050505;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      font-size: 15px;
+      color: #050505;
+      line-height: 1.5;
+    }
+
+    /* for content */
+    .content-section {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    .content-section h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      color: #2374e1;
+      border-bottom: 2px solid #050505;
+      padding-bottom: 8px;
+    }
+
+    .content-section h3 {
+      margin: 20px 0 12px;
+      font-size: 16px;
+      color: #4599ff;
+    }
+
+    .content-section p {
+      line-height: 1.6;
+      color: #050505;
+      margin: 12px 0;
+    }
+
+    .content-section ul {
+      padding-left: 20px;
+      margin: 12px 0;
+    }
+
+    .content-section li {
+      margin: 8px 0;
+      color: #65676b;
+    }
+
+    /* code blocks */
+    .code {
+      background: #ffffff;
+      border: 1px solid #3a3b3c;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #050505;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+
+    /* stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: #f0f2f5;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #1877f2;
+    }
+
+    .stat-card .number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4599ff;
+    }
+
+    .stat-card .label {
+      font-size: 13px;
+      color: #b0b3b8;
+      margin-top: 4px;
+    }
+
+    /* feature pills */
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .pill {
+      background: #ffffff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #050505;
+      border: 2px solid #4599ff;
+    }
+
+    /* results table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    th {
+      background: #e4e6eb;
+      padding: 10px;
+      text-align: left;
+      color: #050505;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #3a3b3c;
+      color: #050505;
+    }
+
+    /* images */
+    .plot-placeholder {
+      background: #f0f2f5;
+      padding: 40px;
+      text-align: center;
+      border-radius: 8px;
+      margin: 16px 0;
+      color: #050505;
+      font-style: italic;
+    }
+
+    /* team members */
+    .members {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .member-badge {
+      background: #2374e1;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    /* smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* responsive */
+    @media (max-width: 768px) {
+      .friends-page {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="friends-page">
+    <aside class="sidebar">
+      <h2>Link Prediction</h2>
+      
+      <div class="project-info">
+        <p><strong>CSE 258</strong></p>
+        <p>Assignment 2</p>
+        <p>Fall 2024</p>
+      </div>
+
+      <nav>
+        <a href="#task" class="active">Task Definition</a>
+        <a href="#eda">Data Analysis</a>
+        <a href="#features">Features</a>
+        <a href="#models">Models</a>
+        <a href="#results"> Results</a>
+        <a href="#discussion"> Discussion</a>
+        <a href="#references"> References</a>
+      </nav>
+
+      <div class="project-info" style="margin-top: 20px;">
+        <p><strong>Team Members:</strong></p>
+        <p>• Shaily Nieves Adame</p>
+        <p>• Tatianna Sanchez</p>
+      </div>
+    </aside>
+
+    <!-- main content -->
+    <main class="friends-main">
+      <div class="friends-header">
+        <h1>Predicting Facebook Friendships</h1>
+      </div>
+
+      <p class="subtitle">
+        Modeling how network structure in the Facebook friendship graph relates to the probability of future connections
+        using collaborative filtering and machine learning techniques.
+      </p>
+
+      <!-- task section -->
+      <div class="content-section" id="task">
+        <h2>1. Predictive Task</h2>
+        <p>
+          The objective of this project is to <strong>predict whether two Facebook users are friends</strong>
+          based solely on the structure of the social network. This is framed as a supervised
+          <strong>binary classification</strong> problem, also known as <strong>link prediction</strong>.
+        </p>
+
+        <h3>Problem Formulation</h3>
+        <p>For each candidate pair of users (u, v), we predict:</p>
+        <div class="pill-row">
+          <span class="pill">y = 1 → friendship exists</span>
+          <span class="pill">y = 0 → no friendship</span>
+          <span class="pill">Binary Classification</span>
+        </div>
+
+        <h3>Input Features</h3>
+        <ul>
+          <li>Number of common friends (common neighbors)</li>
+          <li>Jaccard similarity of friend sets</li>
+          <li>Cosine similarity</li>
+          <li>Pearson correlation coefficient</li>
+        </ul>
+
+        <h3>Evaluation Metrics</h3>
+        <ul>
+          <li><strong>ROC AUC</strong> - Ranking quality across all thresholds</li>
+          <li><strong>Average Precision</strong> - Precision-recall summary</li>
+          <li><strong>Accuracy</strong> - Classification correctness</li>
+        </ul>
+      </div>
+
+      <!-- EDA SECTION -->
+      <div class="content-section" id="eda">
+        <h2>2. Exploratory Data Analysis</h2>
+        
+        <h3>Facebook Network Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="number">4,039</div>
+            <div class="label">Users (Nodes)</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">88,234</div>
+            <div class="label">Friendships (Edges)</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">43.7</div>
+            <div class="label">Average Degree</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">0.0108</div>
+            <div class="label">Network Density</div>
+          </div>
+        </div>
+
+        <h3>Degree Distribution</h3>
+        <p>
+          The network exhibits <strong>scale-free</strong> behavior with a power law degree distribution.
+          Most users have moderate friend counts while few act as highly connected hubs.
+        </p>
+        <div class="plot-placeholder">
+          [Degree Distribution Plot - Linear/Log/Log-Log scales]
+        </div>
+
+        <h3>Small-World Properties</h3>
+        <ul>
+          <li><strong>High Clustering:</strong> Average coefficient ≈ 0.6</li>
+          <li><strong>Short Paths:</strong> Average distance < 4 hops</li>
+          <li><strong>90th Percentile:</strong> ≈ 5 hops</li>
+        </ul>
+        <p>
+          These properties confirm strong <strong>triadic closure</strong> - 
+          friends of friends are likely to be friends.
+        </p>
+      </div>
+
+      <!-- features section -->
+      <div class="content-section" id="features">
+        <h2>3. Feature Engineering</h2>
+        
+        <h3>Collaborative Filtering Features</h3>
+        <div class="code">
+# For each pair (u, v):
+Γ(u) = set of neighbors of u
+Γ(v) = set of neighbors of v
+
+1. Common Neighbors = |Γ(u) ∩ Γ(v)|
+2. Jaccard = |Γ(u) ∩ Γ(v)| / |Γ(u) ∪ Γ(v)|
+3. Cosine = |Γ(u) ∩ Γ(v)| / √(|Γ(u)| × |Γ(v)|)
+4. Pearson = correlation coefficient
+        </div>
+
+        <h3>Dataset Construction</h3>
+        <ul>
+          <li>20,000 positive examples (existing edges)</li>
+          <li>20,000 negative examples (random non-edges)</li>
+          <li>70/30 stratified train-test split</li>
+          <li>Balanced classes to avoid bias</li>
+        </ul>
+      </div>
+
+      <!-- models section -->
+      <div class="content-section" id="models">
+        <h2>4. Models</h2>
+        
+        <h3>Baseline Models (From Course)</h3>
+        <table>
+          <tr>
+            <th>Model</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>Logistic Regression (Jaccard)</td>
+            <td>Classification</td>
+            <td>Single feature baseline from course</td>
+          </tr>
+          <tr>
+            <td>Matrix Factorization (SVD)</td>
+            <td>Recommender Systems</td>
+            <td>Netflix-style latent factors</td>
+          </tr>
+          <tr>
+            <td>Common Neighbors</td>
+            <td>Heuristic</td>
+            <td>Pure collaborative filtering</td>
+          </tr>
+        </table>
+
+        <h3>Advanced Models</h3>
+        <table>
+          <tr>
+            <th>Model</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>Logistic Regression (Full)</td>
+            <td>Linear Model</td>
+            <td>All four features combined</td>
+          </tr>
+          <tr>
+            <td>Gradient Boosting</td>
+            <td>Ensemble</td>
+            <td>Sequential tree boosting</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- results section -->
+      <div class="content-section" id="results">
+        <h2>5. Results</h2>
+        
+        <h3>Model Performance Comparison</h3>
+        <table>
+          <tr>
+            <th>Model</th>
+            <th>AUC</th>
+            <th>Accuracy</th>
+            <th>Average Precision</th>
+          </tr>
+          <tr>
+            <td>LR (Jaccard)</td>
+            <td>0.990</td>
+            <td>0.934</td>
+            <td>0.989</td>
+          </tr>
+          <tr>
+            <td>LR (Full)</td>
+            <td>0.993</td>
+            <td>0.960</td>
+            <td>0.991</td>
+          </tr>
+          <tr>
+            <td>SVD</td>
+            <td>0.948</td>
+            <td>0.867</td>
+            <td>0.957</td>
+          </tr>
+          <tr style="background: #2374e1;">
+            <td><strong>Common Neighbors</strong></td>
+            <td><strong>0.994</strong></td>
+            <td><strong>0.916</strong></td>
+            <td><strong>0.992</strong></td>
+          </tr>
+          <tr>
+            <td>Gradient Boosting</td>
+            <td>0.994</td>
+            <td>0.970</td>
+            <td>0.993</td>
+          </tr>
+        </table>
+
+        <h3>Key Finding</h3>
+        <div style="background: #f0f2f5; padding: 16px; border-radius: 8px;border-color: #1877f2;margin: 16px 0;">
+          <p style="margin: 0; color: #28c41a; font-weight: bold;">
+            Simple Common Neighbors achieves 0.994 AUC - matching complex models!
+          </p>
+          <p style="margin: 8px 0 0 0;">
+            This demonstrates that Facebook's strong triadic closure makes simple 
+            collaborative filtering optimal.
+          </p>
+        </div>
+
+        <h3>Feature Importance (Gradient Boosting)</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="number">91.8%</div>
+            <div class="label">Common Neighbors</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">2.2%</div>
+            <div class="label">Jaccard</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">4.1%</div>
+            <div class="label">Cosine</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">2.0%</div>
+            <div class="label">Pearson</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- discussion section -->
+      <div class="content-section" id="discussion">
+        <h2>6. Discussion</h2>
+        
+        <h3>Main Findings</h3>
+        <ul>
+          <li>
+            <strong>Simplicity Wins:</strong> Common Neighbors (1960s concept) matches 
+            state-of-the-art Gradient Boosting (2000s ML)
+          </li>
+          <li>
+            <strong>Zero Training Time:</strong> Heuristic requires no model training, 
+            enabling real-time predictions
+          </li>
+          <li>
+            <strong>Strong Triadic Closure:</strong> Friends-of-friends mechanism 
+            dominates Facebook network formation
+          </li>
+        </ul>
+
+        <h3>Practical Implications</h3>
+        <div class="pill-row">
+          <span class="pill">10,000x faster inference</span>
+          <span class="pill">Perfect interpretability</span>
+          <span class="pill">Scales to billions</span>
+          <span class="pill">No training needed</span>
+        </div>
+
+        <h3>Limitations & Future Work</h3>
+        <ul>
+          <li>Static snapshot - could explore temporal dynamics</li>
+          <li>Consider node attributes beyond structure</li>
+          <li>Test on other social networks</li>
+          <li>Explore Graph Neural Networks for comparison</li>
+        </ul>
+      </div>
+
+      <!-- references section -->
+      <div class="content-section" id="references">
+        <h2>7. References</h2>
+        <ul>
+          <li>
+            <strong>Liben-Nowell & Kleinberg (2007)</strong> - 
+            The Link Prediction Problem for Social Networks
+          </li>
+          <li>
+            <strong>McAuley & Leskovec (2012)</strong> - 
+            Learning to Discover Social Circles in Ego Networks
+          </li>
+          <li>
+            <strong>Watts & Strogatz (1998)</strong> - 
+            Collective Dynamics of Small-World Networks
+          </li>
+          <li>
+            <strong>Course Materials</strong> - 
+            CSE 258 Classification, Regression, and Recommender Systems lectures
+          </li>
+        </ul>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>
